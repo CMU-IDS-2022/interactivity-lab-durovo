@@ -9,7 +9,7 @@ def load_data():
     Write 1-2 lines of code here to load the data from CSV to a pandas dataframe
     and return it.
     """
-    pass
+    return pd.read_csv('pulse39.csv')
 
 @st.cache
 def get_slice_membership(df, genders, races, educations, age_range):
@@ -70,6 +70,22 @@ st.title("Household Pulse Explorable")
 with st.spinner(text="Loading data..."):
     df = load_data()
 st.text("Visualize the overall dataset and some distributions here...")
+st.write(df)
+
+education_bar = alt.Chart(df).mark_bar().encode(
+    alt.X('education'),
+    alt.Y('count(received_vaccine)'),
+    color=alt.Color('received_vaccine'),
+    tooltip=['race']
+    ).interactive()
+st.write(education_bar)
+
+education_bar = alt.Chart(df).mark_bar().encode(
+    alt.X('race'),
+    alt.Y("count(received_vaccine)"),
+    color=alt.Color('received_vaccine')
+    ).interactive()
+st.write(education_bar)
 
 st.header("Custom slicing")
 st.text("Implement your interactive slicing tool here...")
