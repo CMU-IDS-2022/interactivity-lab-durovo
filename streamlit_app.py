@@ -121,21 +121,36 @@ educations = st.multiselect('Select Education Level', df_long.education.unique()
 age_range = st.slider('Select Age Range', int(df_long.age.min()), int(df_long.age.max()), (0, 100))
 st.write(age_range)
 
-filtered_data = df_long.loc[get_slice_membership(df_long, genders, races, educations, age_range)]
+slice_filter = get_slice_membership(df_long, genders, races, educations, age_range)
+
 
 # st.write(filtered_data)
 # sliced_chart = alt.Chart(filtered_data).mark_bar().encode(
 #     alt.X('reason'),
 #     alt.Y('count(vaccine_intention)')
 # )
-chart = alt.Chart(filtered_data, title='In Slice').mark_bar().encode(
+in_group = df_long[slice_filter]
+in_slice_reasons_chart = alt.Chart(in_group, title='In Slice').mark_bar().encode(
+    x='sum(agree)',
+    y='reason:O',
+).interactive()
+st.write(in_slice_reasons_chart)
+
+out_slice_reasons_chart = alt.Chart(df_long[~slice_filter], title='Out of Slice').mark_bar().encode(
     x='sum(agree)',
     y='reason:O',
 ).interactive()
 
-st.write(chart)
+st.write(out_slice_reasons_chart)
 
 
 
 st.header("Person sampling")
-st.text("Implement a button to sample and describe a random person here...")
+random_person_b = st.button('Describe a random person from the selected group')
+if random_person_b:
+    # st.write()
+    person = in_group.sample(n=1).iloc[0]
+
+    st.write(f'Person X is a {person.age} year old {person.race.lower()} {person.gender.lower()}.')
+
+
