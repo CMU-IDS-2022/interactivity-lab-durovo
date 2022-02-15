@@ -27,6 +27,12 @@ def get_slice_membership(df, genders, races, educations, age_range):
     labels = pd.Series([1] * len(df), index=df.index)
     if genders:
         labels &= df['gender'].isin(genders)
+    if races:
+        labels &= df['race'].isin(races)
+    if educations:
+        labels &= df['education'].isin(educations)
+    if age_range:
+        labels &= (df['age_group'] <= age_range[1]) & (df['age_group'] >= age_range[0])
     # ... complete this function for the other demographic variables
     return labels
 
@@ -87,8 +93,39 @@ education_bar = alt.Chart(df).mark_bar().encode(
     ).interactive()
 st.write(education_bar)
 
+
+race_education = alt.Chart(df).mark_bar().encode(
+    alt.X('race'),
+    alt.Y("education"),
+    color=alt.Color('count()')
+    ).interactive()
+st.write(race_education)
+
 st.header("Custom slicing")
 st.text("Implement your interactive slicing tool here...")
+
+
+df_long = make_long_reason_dataframe(df, 'why_no_vaccine_')
+print(df_long.columns)
+
+print(df_long['race'].unique().tolist())
+races = st.multiselect('Select Races', )
+
+genders = st.multiselect('Select Gender', df_long.gender.unique())
+
+educations = st.multiselect('Select Education Level', df_long.education.unique())
+
+# age_range = st.slider('Select Age Range', df_long.age.min(), df_long.age.max())
+
+filtered_data = df_long.loc[get_slice_membership(df_long, genders, races, educations, None)]
+
+sliced_chart = alt.Chart(filtered_data).mark_bar().encode(
+    alt.X('reason'),
+    alt.Y('count(vaccine_intention)')
+)
+
+
+
 
 st.header("Person sampling")
 st.text("Implement a button to sample and describe a random person here...")
